@@ -44,6 +44,11 @@ unsigned long previousMillisTemp = 0;        // will store last time Temp was up
 long OnTimeTemp = 30000;           // milliseconds of on-time
 long OffTimeTemp = 15000;          // milliseconds of off-time
 
+unsigned long previousMillisCard = 0;        // will store last time Card was updated - prevents multiple readings on swipe
+long OnTimeCard = 500;           // milliseconds of on-time
+long OffTimeCard = 500;          // milliseconds of off-time
+
+
 void setup(){
   pinMode(8, OUTPUT);
    
@@ -70,6 +75,12 @@ void loop(){
 }/* --(end main loop )-- */
 
 void cardReader() {
+  
+    unsigned long currentMillis = millis();
+  
+   if(currentMillis - previousMillisCard >= OnTimeCard){
+     previousMillisCard = currentMillis;  // Remember the time
+     
 if (rfid.isCard()) {
         if (rfid.readCardSerial()) {
             if (rfid.serNum[0] != serNum0
@@ -108,18 +119,22 @@ if (rfid.isCard()) {
           }
           
                         if(serNum0 == 244) {
-                          Serial.print("Hen 1 is in");
+                          Serial.println("Hen 1 is in");
                           Serial.println(" ");
+                          lcd.clear();
                           lcd.setCursor(0, 0);
-                          lcd.print("Hen 1 is in ");
+                          lcd.println("Hen 1 is inside ");
                         } else if(serNum0 == 133) {
-                          Serial.print("Hen 2 is in");
+                          Serial.println("Hen 2 is in");
                           Serial.println(" ");
+                          lcd.clear();
                           lcd.setCursor(0, 0);
-                          lcd.print("Hen 2 is in ");
+                          lcd.print("Hen 2 is inside");
                         }
-    }
+                        
+}
     rfid.halt();
+}
 }
 void lightSensor(){
 
@@ -140,7 +155,7 @@ void lightSensor(){
   lcd.setCursor(0, 0);
   if(valf<15) digitalWrite(8, HIGH);   // set the LED on
   else digitalWrite(8, LOW);   // set the LED on
-  
+  lcd.clear();
   if(valf<15) lcd.print("Light is on. ");
   else lcd.print("Light is off. ");
    } 
@@ -226,7 +241,7 @@ double dewPoint(double celsius, double humidity)
         double VP = pow(10, SUM-3) * humidity;
         double T = log(VP/0.61078);   // temp var
         return (241.88 * T) / (17.558-T);
-}
+}  
 
 // delta max = 0.6544 wrt dewPoint()
 // 5x faster than dewPoint()
